@@ -1,10 +1,10 @@
 plugins {
-    id 'fabric-loom' version '0.5-SNAPSHOT'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
     id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -28,21 +28,24 @@ repositories {
         name = "RetryLife - Release"
         url = "https://release.maven.retrylife.ca"
     }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
-    modCompile "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-
-    // Client-side commands
-    modImplementation "io.github.cottonmc:cotton-client-commands:1.0.1+1.16-rc1"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
     // Minimap mods
-    modImplementation "xaero:minimap:21.4.4"
-    modImplementation "xaero:worldmap:1.13.1"
+    modImplementation "curse.maven:xaerosminimap-263420:3511446"
+    modImplementation "curse.maven:xaerosworldmap-317780:3526759"
 
     // JSON
     implementation 'com.google.code.gson:gson:2.8.6'
