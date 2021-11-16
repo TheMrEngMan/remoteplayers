@@ -57,7 +57,7 @@ dependencies {
 
 processResources {
     inputs.property "version", project.version
-
+    duplicatesStrategy 'include'
     from(sourceSets.main.resources.srcDirs) {
         include "fabric.mod.json"
         expand "version": project.version

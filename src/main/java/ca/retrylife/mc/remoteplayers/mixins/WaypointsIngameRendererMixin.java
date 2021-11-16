@@ -15,6 +15,7 @@ import net.minecraft.util.math.Vec3d;
 import xaero.common.AXaeroMinimap;
 import xaero.common.minimap.waypoints.Waypoint;
 import xaero.common.minimap.waypoints.render.WaypointsIngameRenderer;
+import java.lang.reflect.*;
 
 @Mixin(WaypointsIngameRenderer.class)
 public abstract class WaypointsIngameRendererMixin extends WaypointsIngameRenderer{
@@ -35,7 +36,12 @@ public abstract class WaypointsIngameRendererMixin extends WaypointsIngameRender
             BufferBuilder bufferbuilder, Tessellator tessellator, double dimDiv, double actualEntityY, float yaw,
             float pitch) {
         synchronized (list) {
-            float cameraAngleYaw = MathHelper.wrapDegrees(entity.lastYaw);
+            float cameraAngleYaw = 0;
+            try {
+            Field yawfield = Entity.class.getDeclaredField("yaw");
+            yawfield.setAccessible(true);
+            cameraAngleYaw = MathHelper.wrapDegrees((float)yawfield.get(entity));
+            } catch (Exception e) { } // cry about it
             Vec3d lookVector = entity.getRotationVector();
             Iterator<Waypoint> iter = list.iterator();
 

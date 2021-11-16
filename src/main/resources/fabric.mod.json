@@ -12,19 +12,16 @@
     "entrypoints": {
         "main": [
             "ca.retrylife.mc.remoteplayers.RemotePlayers"
-        ],
-        "cotton-client-commands": [
-            "ca.retrylife.mc.remoteplayers.commands.CommandSetup"
         ]
     },
     "mixins": [
         "remoteplayers.mixins.json"
     ],
     "depends": {
-        "fabricloader": ">=0.8.7",
-        "fabric": ">=0.17.2",
-        "minecraft": ">=1.16.2",
-        "cotton-client-commands": ">=0.4.0",
-        "xaerominimap": ">=19.0"
+        "fabricloader": ">=0.11.3",
+        "fabric": "*",
+        "minecraft": ">=1.17.x",
+        "xaerominimap": ">=19.0",
+        "java":">=16"
     }
 }
