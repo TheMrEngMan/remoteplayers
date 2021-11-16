@@ -35,7 +35,7 @@ public abstract class WaypointsIngameRendererMixin extends WaypointsIngameRender
             BufferBuilder bufferbuilder, Tessellator tessellator, double dimDiv, double actualEntityY, float yaw,
             float pitch) {
         synchronized (list) {
-            float cameraAngleYaw = MathHelper.wrapDegrees(entity.yaw);
+            float cameraAngleYaw = MathHelper.wrapDegrees(entity.lastYaw);
             Vec3d lookVector = entity.getRotationVector();
             Iterator<Waypoint> iter = list.iterator();
 
