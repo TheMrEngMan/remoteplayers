@@ -1,18 +1,16 @@
 package ca.retrylife.mc.remoteplayers;
 
-import java.util.prefs.Preferences;
-
+import ca.retrylife.mc.remoteplayers.config.RemotePlayerConfig;
+import me.shedaniel.autoconfig.AutoConfig;
 import org.jetbrains.annotations.Nullable;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Persistent storage for the application
  */
 public class Database {
-    private Logger logger = LogManager.getLogger(getClass());
     private static Database instance = null;
+
+    private final RemotePlayerConfig config;
 
     public static Database getInstance() {
         if (instance == null) {
@@ -21,49 +19,61 @@ public class Database {
         return instance;
     }
 
-    // Preference prefixes
-    private static final String DYNMAP_LINKAGE_PREFIX = "dynmap_";
-
-    // Class preferences access
-    private Preferences preferences;
-
     private Database() {
-
-        // Access the class preferences
-        preferences = Preferences.userRoot().node(this.getClass().getName());
-
-        logger.debug("Opened lock on mod preferences");
-    }
-
-    private String getPrefKeyForServer(String server) {
-        return String.format("%s%s", DYNMAP_LINKAGE_PREFIX, server);
-    }
-
-    /**
-     * Sets if waypoint integration should be enabled
-     * 
-     * @param enabled Should be enabled?
-     */
-    public void setEnableIntegration(boolean enabled) {
-        logger.debug(String.format("Waypoint integration set: %b", enabled));
-        preferences.put("integrate_waypoints", (enabled) ? "T" : "F");
+        config = AutoConfig.getConfigHolder(RemotePlayerConfig.class).getConfig();
     }
 
     /**
      * Gets if waypoint integration should be enabled
      */
-    public boolean getIntegrationEnabled() {
-        return preferences.get("integrate_waypoints", "F").equals("T");
+    public boolean modEnabled() {
+        return config.modEnabled;
+    }
+
+    public boolean entityRadarEnabled() {
+        return config.entityRadarEnabled;
+    }
+
+    public boolean inGameWaypointsEnabled() {
+        return config.inGameWaypointsEnabled;
+    }
+
+    public int waypointColor() {
+        return config.waypointColor.ordinal();
+    }
+
+    public boolean showOverworldPositionInNether() {
+        return config.showOverworldPositionInNether;
+    }
+
+    public boolean showNetherPositionInOverworld() {
+        return config.showNetherPositionInOverworld;
+    }
+
+    public int updateInterval() {
+        return config.updateInterval;
+    }
+
+    public int minimumWaypointDistance() {
+        return config.minimumWaypointDistance;
+    }
+
+    public int minimumVisibleWaypointDistance() {
+        return config.minimumVisibleWaypointDistance;
+    }
+
+    public RemotePlayerConfig.ChatNotificationType getChatNotificationType() {
+        return config.chatNotificationType;
     }
 
     /**
      * Get the dynmap url for a minecraft server. May be null
      * 
-     * @param server Minecraft server
+     * @param server Minecraft server IP
      * @return Dynmap URL
      */
     public @Nullable String getConfiguredDynmapForServer(String server) {
-        return preferences.get(getPrefKeyForServer(server), null);
+        return config.serverDynmapURLs.get(server);
     }
 
     /**
@@ -76,24 +86,4 @@ public class Database {
         return getConfiguredDynmapForServer(server) != null;
     }
 
-    /**
-     * Set a dynmap url for a minecraft server
-     * 
-     * @param server    Minecraft server
-     * @param remoteURL Dynmap URL
-     */
-    public void setDynmapRemoteForServer(String server, String remoteURL) {
-        logger.debug(String.format("Added dynmap to server: %s -> %s", server, remoteURL));
-        preferences.put(getPrefKeyForServer(server), remoteURL);
-    }
-
-    /**
-     * Removes any dynmap URLs from a minecraft server
-     * 
-     * @param server Minecraft server
-     */
-    public void unlinkDynmapRemoteForServer(String server) {
-        logger.debug(String.format("Removed dynmap from server: %s ", server));
-        preferences.remove(getPrefKeyForServer(server));
-    }
 }

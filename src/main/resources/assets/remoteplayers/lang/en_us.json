@@ -1,0 +1,60 @@
+{
+  "text.autoconfig.remoteplayers.title": "Remote Players",
+  "text.autoconfig.remoteplayers.category.general": "General",
+  "text.autoconfig.remoteplayers.category.server_settings": "Server Settings",
+
+  "text.autoconfig.remoteplayers.option.modEnabled": "Mod enabled",
+  "text.autoconfig.remoteplayers.option.inGameWaypointsEnabled": "Show in-game waypoints",
+  "text.autoconfig.remoteplayers.option.inGameWaypointsEnabled.@Tooltip": "Appearance can be configured in world map and minimap settings",
+  "text.autoconfig.remoteplayers.option.showOverworldPositionInNether": "Show Overworld position in Nether",
+  "text.autoconfig.remoteplayers.option.showOverworldPositionInNether.@Tooltip": "Show waypoints in the nether corresponding to where the player is in the overworld\nWaypoints will be labeled with an asterisk and (OW) suffix\nThe world name must match \"<overworld-name>_nether\"",
+  "text.autoconfig.remoteplayers.option.showNetherPositionInOverworld": "Show Nether position in Overworld",
+  "text.autoconfig.remoteplayers.option.showNetherPositionInOverworld.@Tooltip": "Show waypoints in the overworld corresponding to where the player is in the nether\nWaypoints will be labeled with an asterisk and (N) suffix\nThe world name must match the nether name minus the \"_nether\" suffix",
+
+  "text.autoconfig.remoteplayers.option.entityRadarEnabled": "Show on entity radar",
+  "text.autoconfig.remoteplayers.option.entityRadarEnabled.@Tooltip": "Appearance can be configured in minimap entity radar settings",
+
+  "text.autoconfig.remoteplayers.option.waypointColor": "Waypoint color",
+  "text.autoconfig.remoteplayers.option.waypointColor.BLACK":         "Black",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_BLUE":     "Dark Blue",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_GREEN":    "Dark Green",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_AQUA":     "Dark Aqua",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_RED":      "Dark Red",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_PURPLE":   "Dark Purple",
+  "text.autoconfig.remoteplayers.option.waypointColor.GOLD":          "Gold",
+  "text.autoconfig.remoteplayers.option.waypointColor.GRAY":          "Gray",
+  "text.autoconfig.remoteplayers.option.waypointColor.DARK_GRAY":     "Dark Gray",
+  "text.autoconfig.remoteplayers.option.waypointColor.BLUE":          "Blue",
+  "text.autoconfig.remoteplayers.option.waypointColor.GREEN":         "Green",
+  "text.autoconfig.remoteplayers.option.waypointColor.AQUA":          "Aqua",
+  "text.autoconfig.remoteplayers.option.waypointColor.RED":           "Red",
+  "text.autoconfig.remoteplayers.option.waypointColor.LIGHT_PURPLE":  "Light Purple",
+  "text.autoconfig.remoteplayers.option.waypointColor.YELLOW":        "Yellow",
+  "text.autoconfig.remoteplayers.option.waypointColor.WHITE":         "White",
+
+  "text.autoconfig.remoteplayers.option.updateInterval": "Update interval (seconds)",
+  "text.autoconfig.remoteplayers.option.updateInterval.@Tooltip": "How often to request data from Dynmap",
+
+  "text.autoconfig.remoteplayers.option.minimumWaypointDistance": "Minimum waypoint distance",
+  "text.autoconfig.remoteplayers.option.minimumWaypointDistance.@Tooltip": "Obstructed players must be at least this far away\nfor in-game waypoints to be shown\nSet to 0 to disable this check",
+
+  "text.autoconfig.remoteplayers.option.minimumVisibleWaypointDistance": "Minimum visible waypoint distance",
+  "text.autoconfig.remoteplayers.option.minimumVisibleWaypointDistance.@Tooltip": "Unobstructed players must be at least this far away\nfor in-game waypoints to be shown\nSet to 0 to disable this check",
+
+  "text.autoconfig.remoteplayers.option.chatNotificationType": "Chat notification type",
+  "text.autoconfig.remoteplayers.option.chatNotificationType.@Tooltip": "How to notify when players (dis)appear on map or switch dimensions",
+
+  "text.autoconfig.remoteplayers.option.serverDynmapURLs": "Server Dynmap URLs",
+  "text.autoconfig.remoteplayers.option.serverDynmapURLs.@Tooltip": "For each server you'd like to use the mod on,\nfill out the IP and corresponding Dynmap URL like so:\nplay.example.com -> https://dynmap.example.com",
+
+  "text.remoteplayers.chat.prefix": "§8[§7RP§8]§r ",
+  "text.remoteplayers.chat.command.playerlist.noplayers": "No players on map",
+  "text.remoteplayers.chat.command.playerlist.header": "Players on map (%s):",
+  "text.remoteplayers.chat.command.playerlist.row": "§<cc>%s§r: %s§cx§r %s§ay§r %s§9z§r in §o%s",
+  "text.remoteplayers.chat.command.playerinfo.info": "§<cc>%s§r: %s§cx§r %s§ay§r %s§9z§r in §o%s",
+  "text.remoteplayers.chat.command.playerinfo.error": "§cPlayer %s not found!",
+
+  "text.remoteplayers.chat.nofification.playerdisappeared": "§<cc>%s§r disappeared from map, last world: §o%s",
+  "text.remoteplayers.chat.nofification.playerappeared": "§<cc>%s§r appeared on map in world: §o%s",
+  "text.remoteplayers.chat.nofification.playermoved": "§<cc>%s§r moved from §o%s§r to §o%s"
+}

@@ -7,21 +7,32 @@
     "authors": [
         "Xnor50"
     ],
+    "contributors": [
+        "MrEngMan"
+    ],
     "license": "GPLv3",
     "environment": "client",
     "entrypoints": {
         "main": [
             "ca.retrylife.mc.remoteplayers.RemotePlayers"
+        ],
+        "modmenu": [
+            "ca.retrylife.mc.remoteplayers.config.RemotePlayerConfigModMenuIntegration"
         ]
     },
     "mixins": [
         "remoteplayers.mixins.json"
     ],
+    "icon": "assets/remoteplayers/icon.png",
     "depends": {
         "fabricloader": ">=0.11.3",
         "fabric": "*",
-        "minecraft": ">=1.17.x",
+        "minecraft": "1.19.3",
         "xaerominimap": ">=19.0",
-        "java":">=16"
+        "java":">=17",
+        "cloth-config2": "*"
+    },
+    "suggests": {
+        "modmenu": "*"
     }
 }

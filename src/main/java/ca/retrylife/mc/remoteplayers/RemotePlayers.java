@@ -1,5 +1,12 @@
 package ca.retrylife.mc.remoteplayers;
 
+import ca.retrylife.mc.remoteplayers.commands.PlayerCommands;
+import ca.retrylife.mc.remoteplayers.config.ServerDynmapURLGuiProvider;
+import ca.retrylife.mc.remoteplayers.config.RemotePlayerConfig;
+import ca.retrylife.mc.remoteplayers.config.WaypointColorGuiProvider;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.event.ConfigSerializeEvent;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 
 import java.util.Timer;
@@ -17,39 +24,58 @@ public class RemotePlayers implements ModInitializer {
     private static Logger logger = LogManager.getLogger(RemotePlayers.class);
 
     // Update task
-    private static UpdateTask updateTask = new UpdateTask();
-    private static Timer dynmapUpdateThread = null;
+    private static final UpdateTask updateTask = new UpdateTask();
 
     // Connection to Dynmap
     private static DynmapConnection connection = null;
 
-    // Online status
-    public static boolean isOnline = false;
+    // Status
     public static boolean isDisabled = false;
+
+    // TODO: Maybe save last known position (optionally as permanent waypoints if player leaves)
+    // TODO: Don't flood all waypoint lists with temp waypoints when selecting current active waypoint set in world map
+
+    // TODO: Somehow make this adapt to the actual coordinate scale (using coordinateScale())
+    public static final int NETHER_COORDINATE_SCALE = 8;
 
     @Override
     public void onInitialize() {
-        logger.info("RemotePlayers starting...");
-        // logger.info(
-        // String.format("RemotePlayers hooked in to Minimap version: %s",
-        // XaeroMinimap.instance.getVersionID()));
-
-        // Begin a thread for updating the map
-        dynmapUpdateThread = new Timer(true);
-        dynmapUpdateThread.scheduleAtFixedRate(updateTask, 0, 2000);
-
-        logger.info("RemotePlayers started");
+        // Load and setup the configuration (ModMenu integration)
+        loadConfig();
+        // Schedule updating the map
+        Timer updateThread = new Timer(true);
+        updateThread.scheduleAtFixedRate(updateTask, 0, 1000);
+        // Register the commands
+        PlayerCommands.register();
     }
 
-    /**
-     * Set how often to check for player position updates
-     * 
-     * @param seconds Time in seconds
-     */
-    public static void setUpdateDelay(double seconds) {
-        updateTask.cancel();
-        dynmapUpdateThread.scheduleAtFixedRate(updateTask, 0, (long) (1000.0 * seconds));
-        logger.info(String.format("Dynmap update delay has been set to %.2f seconds", seconds));
+    public void loadConfig() {
+        AutoConfig.register(RemotePlayerConfig.class, GsonConfigSerializer::new);
+        var guiRegistry = AutoConfig.getGuiRegistry(RemotePlayerConfig.class);
+        // Create and register custom providers for the server IP -> Dynmap URL list
+        guiRegistry.registerPredicateProvider(
+                new ServerDynmapURLGuiProvider(),
+                field -> field.getName().equals("serverDynmapURLs")
+        );
+        // And the waypoint color selection
+        guiRegistry.registerPredicateProvider(
+                new WaypointColorGuiProvider(),
+                field -> field.getName().equals("waypointColor")
+        );
+        AutoConfig.getConfigHolder(RemotePlayerConfig.class).registerSaveListener(onConfigSaved());
+    }
+
+    public ConfigSerializeEvent.Save<RemotePlayerConfig> onConfigSaved() {
+        return (configHolder, remotePlayerConfig) -> {
+            // When user changes any config value, reset everything to apply the new values
+            setConnection(null);
+            updateTask.onConfigChange();
+            return null;
+        };
+    }
+
+    public static void onDisconnect() {
+        updateTask.onDisconnect();
     }
 
     /**

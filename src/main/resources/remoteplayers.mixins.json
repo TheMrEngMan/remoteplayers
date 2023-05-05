@@ -1,11 +1,12 @@
 {
-    "required": true,
-    "package": "ca.retrylife.mc.remoteplayers.mixins",
-    "compatibilityLevel": "JAVA_8",
-    "mixins": [
-        "WaypointsIngameRendererMixin"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+  "required": true,
+  "package": "ca.retrylife.mc.remoteplayers.mixins",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "MinimapRadarMixin",
+    "MixinMinecraftClient"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
