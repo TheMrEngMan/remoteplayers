@@ -75,6 +75,8 @@ public class RemotePlayers implements ModInitializer {
     }
 
     public static void onDisconnect() {
+        // Remove Dynmap connection data when disconnecting from server
+        RemotePlayers.setConnection(null);
         updateTask.onDisconnect();
     }
 
