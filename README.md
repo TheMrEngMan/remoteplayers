@@ -15,6 +15,12 @@ Example setup:
 
 ![Map names must match Dynmap world names](/images/maps_setup.png)
 
+Server address must match the configured server address -> Dynmap URL mapping exactly as entered in the server settings.
+
+Example setup:
+
+![Server address must match](/images/server_address_setup.png)
+
 ## Commands
 `/remoteplayers info <player name>` get info about a player
 
