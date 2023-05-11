@@ -38,12 +38,12 @@ public class WaypointColorGuiProvider implements GuiProvider {
     @Override
     public List<AbstractConfigListEntry> get(String i13n, Field field, Object config_, Object defaults, GuiRegistryAccess registry) {
         RemotePlayerConfig config = (RemotePlayerConfig) config_;
-        if(config.waypointColor == null) config.waypointColor = RemotePlayerConfig.WaypointColor.BLACK;
+        if(config.waypointColor == null) config.waypointColor = RemotePlayerConfig.WaypointColor.DARK_PURPLE;
 
         return Collections.singletonList(
                 ConfigEntryBuilder.create()
                         .startEnumSelector(Text.translatable(WAYPOINT_COLOR), RemotePlayerConfig.WaypointColor.class, config.waypointColor)
-                        .setDefaultValue(RemotePlayerConfig.WaypointColor.BLACK)
+                        .setDefaultValue(RemotePlayerConfig.WaypointColor.DARK_PURPLE)
                         .setSaveConsumer(waypointColor -> config.waypointColor = waypointColor)
                         .setEnumNameProvider(anEnum -> Text.translatable(WAYPOINT_COLOR + "." + anEnum.name()).formatted(colorFormatting[anEnum.ordinal()]))
                         .build()

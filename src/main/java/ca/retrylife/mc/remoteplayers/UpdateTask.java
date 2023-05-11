@@ -223,6 +223,8 @@ public class UpdateTask extends TimerTask {
             // TODO: fix this so it doesn't *sometimes* show appear / disappear messages as *some* players log in/out and when joining a server (for *some* players)
             if(previousPlayerPositions != null && Database.getInstance().getChatNotificationType() != RemotePlayerConfig.ChatNotificationType.NONE) {
                 for (PlayerPosition previousPlayerPosition : previousPlayerPositions.values()) {
+                    // Don't show notifications for self
+                    if(previousPlayerPosition.username.equals(mc.player.getEntityName())) continue;
                     if (!playerPositions.containsKey(previousPlayerPosition.username) && onlinePlayers.contains(previousPlayerPosition.username)) {
                         ChatUtil.showNotificationChatMessage(mc.player, Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.nofification.playerdisappeared").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), previousPlayerPosition.username, previousPlayerPosition.worldName)));
                     } else {
@@ -232,6 +234,8 @@ public class UpdateTask extends TimerTask {
                     }
                 }
                 for (PlayerPosition playerPosition : playerPositions.values()) {
+                    // Don't show notifications for self
+                    if(playerPosition.username.equals(mc.player.getEntityName())) continue;
                     if (!previousPlayerPositions.containsKey(playerPosition.username) && previousOnlinePlayers.contains(playerPosition.username) && onlinePlayers.contains(playerPosition.username)) {
                         ChatUtil.showNotificationChatMessage(mc.player, Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.nofification.playerappeared").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.worldName)));
                     }

@@ -50,6 +50,10 @@ public class Database {
         return config.showNetherPositionInOverworld;
     }
 
+    public RemotePlayerConfig.WaypointRenderBelowMode minimapWaypointsRenderBelow() {
+        return config.minimapWaypointsRenderBelow;
+    }
+
     public int updateInterval() {
         return config.updateInterval;
     }
