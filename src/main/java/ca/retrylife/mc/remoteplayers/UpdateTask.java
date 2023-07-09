@@ -271,7 +271,7 @@ public class UpdateTask extends TimerTask {
                     if(supportXaeroWorldmap == null) {
                         supportXaeroWorldmap = new SupportXaeroWorldmap(XaeroMinimapSession.getCurrentSession().getModMain());
                     }
-                    currentWorldMapName = supportXaeroWorldmap.tryToGetMultiworldName(mc.player.world.getRegistryKey(), mapProcessor.getCurrentMWId());
+                    currentWorldMapName = supportXaeroWorldmap.tryToGetMultiworldName(mc.player.getWorld().getRegistryKey(), mapProcessor.getCurrentMWId());
                     if(currentWorldMapName == null) throw new NullPointerException();
                 } catch (Exception e) {
                     logger.warn("Could not get current world name!");
