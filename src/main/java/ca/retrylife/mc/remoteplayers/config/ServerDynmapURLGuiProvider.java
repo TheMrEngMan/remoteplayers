@@ -26,12 +26,9 @@ public class ServerDynmapURLGuiProvider implements GuiProvider {
         for (String s : serverDynmapURLStrings) {
             Matcher matcher = PATTERN.matcher(s);
             if (matcher.matches()) {
-                String[] serverIP = matcher.group(1).split("\\s+");
+                String serverIP = matcher.group(1);
                 String dynmapURL = matcher.group(2);
-
-                for (String nick : serverIP) {
-                    serverDynmapURLs.put(nick, dynmapURL);
-                }
+                serverDynmapURLs.put(serverIP, dynmapURL);
             } else throw new IllegalArgumentException();
         }
 
@@ -39,26 +36,16 @@ public class ServerDynmapURLGuiProvider implements GuiProvider {
     }
 
     public static List<String> toStrings(Map<String, String> serverDynmapURLs) {
-        Map<String, Set<String>> reverse = new LinkedHashMap<>(); // Dynmap URL -> server IP
+        ArrayList<String> reverse = new ArrayList<>();
 
         for (var entry : serverDynmapURLs.entrySet()) {
             String serverIP = entry.getKey();
-            String dynmapURL = entry.getValue();
-
-            reverse.compute(dynmapURL, (k, v) -> {
-                if (v == null) v = new LinkedHashSet<>();
-                v.add(serverIP);
-                return v;
-            });
+            String shopURL = entry.getValue();
+            reverse.add(serverIP + " -> " + shopURL);
         }
 
-        return reverse.entrySet().stream()
-                .map(entry -> {
-                    String dynmapURL = entry.getKey();
-                    String serverIP = entry.getValue().stream().reduce((a, b) -> a + " " + b).get();
-                    return serverIP + " -> " + dynmapURL;
-                })
-                .collect(Collectors.toList());
+        return reverse;
+
     }
 
     @SuppressWarnings("rawtypes")

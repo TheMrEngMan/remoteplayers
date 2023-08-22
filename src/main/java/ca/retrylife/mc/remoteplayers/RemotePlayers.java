@@ -30,7 +30,8 @@ public class RemotePlayers implements ModInitializer {
     private static DynmapConnection connection = null;
 
     // Status
-    public static boolean isDisabled = false;
+    public static boolean enabled = false;
+    public static String currentServerIP;
 
     // TODO: Maybe save last known position (optionally as permanent waypoints if player leaves)
     // TODO: Don't flood all waypoint lists with temp waypoints when selecting current active waypoint set in world map
@@ -45,6 +46,8 @@ public class RemotePlayers implements ModInitializer {
         // Schedule updating the map
         Timer updateThread = new Timer(true);
         updateThread.scheduleAtFixedRate(updateTask, 0, 1000);
+        // Register connection / disconnection events
+        ConnectionHandler.init();
         // Register the commands
         PlayerCommands.register();
     }

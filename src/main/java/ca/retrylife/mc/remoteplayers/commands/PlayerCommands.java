@@ -1,7 +1,9 @@
 package ca.retrylife.mc.remoteplayers.commands;
 
 import ca.retrylife.mc.remoteplayers.Database;
+import ca.retrylife.mc.remoteplayers.RemotePlayers;
 import ca.retrylife.mc.remoteplayers.UpdateTask;
+import ca.retrylife.mc.remoteplayers.dynmap.DynmapConnection;
 import ca.retrylife.mc.remoteplayers.dynmap.PlayerPosition;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -39,7 +41,7 @@ public class PlayerCommands {
                     .build();
             ArgumentCommandNode<FabricClientCommandSource, String> playerNameNode = ClientCommandManager
                     .argument("name", StringArgumentType.word())
-                    .suggests((context, builder) -> context.getSource() != null ? CommandSource.suggestMatching(UpdateTask.playerPositions.keySet(), builder) : Suggestions.empty())
+                    .suggests((context, builder) -> (context.getSource() != null && UpdateTask.playerPositions != null) ? CommandSource.suggestMatching(UpdateTask.playerPositions.keySet(), builder) : Suggestions.empty())
                     .executes(new PlayerInfoCommand())
                     .build();
 
@@ -80,13 +82,22 @@ public class PlayerCommands {
     static class PlayerListCommand implements Command<FabricClientCommandSource> {
         @Override
         public int run(CommandContext<FabricClientCommandSource> context) {
+            if(!RemotePlayers.enabled) {
+                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notenabled"));
+                return -1;
+            }
+
             if(UpdateTask.playerPositions == null || UpdateTask.playerPositions.isEmpty()) {
                 context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.translatable("text.remoteplayers.chat.command.playerlist.noplayers")));
                 return 1;
             }
             context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerlist.header"), UpdateTask.playerPositions.size()))));
             for(PlayerPosition playerPosition : UpdateTask.playerPositions.values()) {
-                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerlist.row").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.x, playerPosition.y, playerPosition.z, playerPosition.worldName))));
+                if(playerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) {
+                    context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerinfo.invisible").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username))));
+                } else {
+                    context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerinfo.info").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.x, playerPosition.y, playerPosition.z, playerPosition.worldName))));
+                }
             }
             return 1;
         }
@@ -95,6 +106,11 @@ public class PlayerCommands {
     static class PlayerInfoCommand implements Command<FabricClientCommandSource> {
         @Override
         public int run(CommandContext<FabricClientCommandSource> context) {
+            if(!RemotePlayers.enabled) {
+                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notenabled"));
+                return -1;
+            }
+
             String playerName;
             try {
                 playerName = StringArgumentType.getString(context, "name");
@@ -109,7 +125,11 @@ public class PlayerCommands {
             }
             PlayerPosition playerPosition = UpdateTask.playerPositions.get(playerName);
             if(playerPosition != null) {
-                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerinfo.info").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.x, playerPosition.y, playerPosition.z, playerPosition.worldName))));
+                if(playerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) {
+                    context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerinfo.invisible").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username))));
+                } else {
+                    context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.prefix").append(Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.command.playerinfo.info").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.x, playerPosition.y, playerPosition.z, playerPosition.worldName))));
+                }
                 return 1;
             }
             else {

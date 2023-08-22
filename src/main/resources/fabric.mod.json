@@ -5,11 +5,13 @@
     "name": "Remote Players",
     "description": "Hooks dynmap into Xaeros Minimap",
     "authors": [
-        "Xnor50"
-    ],
-    "contributors": [
+        "Xnor50",
         "MrEngMan"
     ],
+    "contact": {
+        "sources": "https://github.com/TheMrEngMan/remoteplayers"
+    },
+    "contributors": [],
     "license": "GPLv3",
     "environment": "client",
     "entrypoints": {
@@ -26,13 +28,11 @@
     "icon": "assets/remoteplayers/icon.png",
     "depends": {
         "fabricloader": ">=0.11.3",
-        "fabric": "*",
         "minecraft": "1.20.1",
-        "xaerominimap": ">=19.0",
+        "xaeroworldmap": ">=1.30.4",
+        "xaerominimap": ">=23.4.4",
         "java":">=17",
+        "fabric-api": "*",
         "cloth-config2": "*"
-    },
-    "suggests": {
-        "modmenu": "*"
     }
 }

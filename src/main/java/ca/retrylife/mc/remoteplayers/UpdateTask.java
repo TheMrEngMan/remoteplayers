@@ -30,7 +30,7 @@ import java.util.*;
  * Threaded task that is run once every second to update the local maps and fetch data from dynmap when need be
  */
 public class UpdateTask extends TimerTask {
-    private Logger logger = LogManager.getLogger(getClass());
+    private final Logger logger = LogManager.getLogger(getClass());
 
     // Access to minecraft and map
     private final MinecraftClient mc;
@@ -55,9 +55,6 @@ public class UpdateTask extends TimerTask {
     public static ArrayList<String> onlinePlayers = new ArrayList<>();
     public static ArrayList<String> previousOnlinePlayers = new ArrayList<>();
 
-    // For keeping track of names of waypoints that are currently added to the active set in order to remove them and not any other user-created waypoints
-    private static final ArrayList<String> playerWaypointNames = new ArrayList<>();
-
     public UpdateTask() {
         this.mc = MinecraftClient.getInstance();
     }
@@ -78,8 +75,8 @@ public class UpdateTask extends TimerTask {
             // Remove all the player positions if mod got disabled
             if(playerPositions != null) playerPositions.clear();
         } else {
-            // Otherwise, set flag to start processing data again
-            RemotePlayers.isDisabled = false;
+            // Otherwise, check if need to enable
+            RemotePlayers.enabled = Database.getInstance().serverHasDynmapLinked(RemotePlayers.currentServerIP);
         }
         recreateWaypoints();
         updateNow();
@@ -97,7 +94,7 @@ public class UpdateTask extends TimerTask {
             ArrayList<Waypoint> waypointList = waypointSet.getList();
             synchronized (waypointList) {
                 // For each of the configured waypoint sets, loop though all waypoints and remove the waypoints created by the mod
-                waypointList.removeIf(waypoint -> waypoint.isTemporary() && playerWaypointNames.contains(waypoint.getName()));
+                waypointList.removeIf(waypoint -> waypoint.isTemporary() && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypoint.getName().replace(" (OW)", "").replace(" (N)", ""))));
             }
         }
     }
@@ -128,31 +125,14 @@ public class UpdateTask extends TimerTask {
         if(mc.world == null || mc.player == null || mc.cameraEntity == null) return;
 
         // Skip if not enabled
-        if(!Database.getInstance().modEnabled() || RemotePlayers.isDisabled) {
-            return;
-        }
-
-        // Skip if not in game
-        if (mc.isInSingleplayer() || mc.getNetworkHandler() == null
-                || !mc.getNetworkHandler().getConnection().isOpen()) {
-            RemotePlayers.isDisabled = false;
-            return;
-        }
-
-        // Get the IP of this server
-        String serverIP;
-        try {
-            serverIP = Objects.requireNonNull(mc.getCurrentServerEntry()).address;
-        } catch (Exception e) {
-            logger.warn("Unable to get server IP");
+        if(!Database.getInstance().modEnabled() || !RemotePlayers.enabled) {
             return;
         }
 
         // Handle setting up a new connection to Dynmap
-        if (RemotePlayers.getConnection() == null && Database.getInstance().serverHasDynmapLinked(serverIP)
-                && !RemotePlayers.isDisabled) {
+        if (RemotePlayers.getConnection() == null) {
             try {
-                RemotePlayers.setConnection(new DynmapConnection(Objects.requireNonNull(Database.getInstance().getConfiguredDynmapForServer(serverIP))));
+                RemotePlayers.setConnection(new DynmapConnection(Objects.requireNonNull(Database.getInstance().getConfiguredDynmapForServer(RemotePlayers.currentServerIP))));
             } catch (Exception e) {
                 e.printStackTrace();
                 String helpText = "(Unknown error)";
@@ -164,13 +144,9 @@ public class UpdateTask extends TimerTask {
                 }
                 ChatUtil.showErrorChatMessage(mc.player, e, "Error connecting to Dynmap!", helpText);
                 RemotePlayers.setConnection(null);
-                RemotePlayers.isDisabled = true;
+                RemotePlayers.enabled = false;
                 return;
             }
-        }
-        if (RemotePlayers.getConnection() == null) {
-            logger.warn("Unable to establish connection to Dynmap");
-            return;
         }
 
         // Skip if minimap not available yet
@@ -197,7 +173,7 @@ public class UpdateTask extends TimerTask {
                 e.printStackTrace();
                 ChatUtil.showErrorChatMessage(mc.player, e, "Error getting data from Dynmap!", "(Could not get data from Dynmap)");
                 RemotePlayers.setConnection(null);
-                RemotePlayers.isDisabled = true;
+                RemotePlayers.enabled = false;
                 return;
             }
 
@@ -225,6 +201,8 @@ public class UpdateTask extends TimerTask {
                 for (PlayerPosition previousPlayerPosition : previousPlayerPositions.values()) {
                     // Don't show notifications for self
                     if(previousPlayerPosition.username.equals(mc.player.getEntityName())) continue;
+                    // Don't show notifications for invisible players
+                    if(previousPlayerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) continue;
                     if (!playerPositions.containsKey(previousPlayerPosition.username) && onlinePlayers.contains(previousPlayerPosition.username)) {
                         ChatUtil.showNotificationChatMessage(mc.player, Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.nofification.playerdisappeared").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), previousPlayerPosition.username, previousPlayerPosition.worldName)));
                     } else {
@@ -236,6 +214,8 @@ public class UpdateTask extends TimerTask {
                 for (PlayerPosition playerPosition : playerPositions.values()) {
                     // Don't show notifications for self
                     if(playerPosition.username.equals(mc.player.getEntityName())) continue;
+                    // Don't show notifications for invisible players
+                    if(playerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) continue;
                     if (!previousPlayerPositions.containsKey(playerPosition.username) && previousOnlinePlayers.contains(playerPosition.username) && onlinePlayers.contains(playerPosition.username)) {
                         ChatUtil.showNotificationChatMessage(mc.player, Text.of(String.format(Language.getInstance().get("text.remoteplayers.chat.nofification.playerappeared").replaceAll("§<cc>", "§" + Integer.toHexString(Database.getInstance().waypointColor())), playerPosition.username, playerPosition.worldName)));
                     }
@@ -295,7 +275,7 @@ public class UpdateTask extends TimerTask {
                     HashMap<String, Integer> waypointNamesIndexes = new HashMap<>(waypointList.size());
                     for (int i = 0; i < waypointList.size(); i++) {
                         Waypoint waypoint = waypointList.get(i);
-                        waypointNamesIndexes.put(waypoint.getName().replace(" (OW)", "").replace(" (N)", ""), i);
+                        waypointNamesIndexes.put(waypointNameToPlayerName(waypoint.getName()), i);
                     }
 
                     // Create indexes of matching player names to player client entities to get distances to each player in range by index
@@ -305,10 +285,6 @@ public class UpdateTask extends TimerTask {
                         AbstractClientPlayerEntity playerClientEntity = playerClientEntityList.get(i);
                         playerClientEntityIndexes.put(playerClientEntity.getEntityName(), i);
                     }
-
-                    // Keep track of which waypoints were previously shown to remove any that are not to be shown anymore
-                    ArrayList<String> previousPlayerWaypointNames = (ArrayList<String>) playerWaypointNames.clone();
-                    playerWaypointNames.clear();
 
                     // Add each player to the map
                     for (PlayerPosition playerPosition : playerPositions.values()) {
@@ -386,7 +362,6 @@ public class UpdateTask extends TimerTask {
                             // Append (N) or (OW) to name and asterisk to symbol if showing player in corresponding nether / overworld
                             waypoint.setName(playerName + (showCurrentPlayersOverworldPositionInNether ? " (OW)" : "") + (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
                             waypoint.setSymbol(waypoint.getSymbol().charAt(0) + (showCurrentPlayersOverworldPositionInNether || showCurrentPlayersNetherPositionInOverworld ? "*" : ""));
-                            playerWaypointNames.add(waypoint.getName());
                         }
 
                         // Otherwise, add a waypoint for the player
@@ -394,20 +369,26 @@ public class UpdateTask extends TimerTask {
                             try {
                                 PlayerWaypoint currentPlayerWaypoint = new PlayerWaypoint(playerPosition, showCurrentPlayersOverworldPositionInNether ? " (OW)" : (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
                                 waypointList.add(currentPlayerWaypoint);
-                                playerWaypointNames.add(currentPlayerWaypoint.getName());
                             } catch (NullPointerException ignored) {}
                         }
 
                     }
 
-                    // Remove any waypoints previously shown that should not be shown anymore
-                    waypointList.removeIf(waypoint -> waypoint.isTemporary() && previousPlayerWaypointNames.contains(waypoint.getName()) && !playerWaypointNames.contains(waypoint.getName()));
+                    // Remove any waypoints for players not shown on map anymore
+                    waypointList.removeIf(waypoint -> waypoint.isTemporary() && playerPositions.values().stream().noneMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
+                    // Remove any waypoints for players in other dimensions if not configured to anymore
+                    if(!Database.getInstance().showOverworldPositionInNether()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (OW)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
+                    if(!Database.getInstance().showNetherPositionInOverworld()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (N)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
 
                 }
             } catch (ConcurrentModificationException ignored) {}
 
         }
 
+    }
+
+    private String waypointNameToPlayerName(String waypointName) {
+        return waypointName.replace(" (OW)", "").replace(" (N)", "");
     }
 
 }

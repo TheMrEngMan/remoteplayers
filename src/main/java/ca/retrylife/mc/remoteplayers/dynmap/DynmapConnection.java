@@ -1,7 +1,6 @@
 package ca.retrylife.mc.remoteplayers.dynmap;
 
 import ca.retrylife.mc.remoteplayers.utils.HTTP;
-import net.minecraft.client.MinecraftClient;
 
 import java.io.IOException;
 import java.net.URL;
@@ -18,6 +17,9 @@ public class DynmapConnection {
 
     private final DynmapConfiguration dynmapConfiguration;
     private final String baseURLString;
+
+    // The name of the world returned for invisible players
+    public static final String BOGUS_WORLD_NAME = "-some-other-bogus-world-";
 
     /**
      * Create a new dynmap connection
@@ -76,6 +78,19 @@ public class DynmapConnection {
         for (int i = 0; i < update.players.length; i++) {
             positions.put(update.players[i].name, new PlayerPosition(update.players[i].name, update.players[i].world, update.players[i].x, update.players[i].y, update.players[i].z));
         }
+
+        // For local testing without Dynmap
+        /*
+        Collection<PlayerListEntry> playerList = MinecraftClient.getInstance().getNetworkHandler().getPlayerList();
+        for (PlayerListEntry playerListEntity : playerList) {
+            String playerName = playerListEntity.getProfile().getName();
+            if(!positions.containsKey(playerName)) {
+                positions.put(playerName, new PlayerPosition(playerName, "Test World", 100, 100, 100));
+            }
+        }
+        positions.put("OverworldPerson", new PlayerPosition("OverworldPerson", "Test World", 200, 100, 100));
+        positions.put("NetherPerson", new PlayerPosition("NetherPerson", "Test World_nether", 100, 100, 200));
+        */
 
         return positions;
     }
