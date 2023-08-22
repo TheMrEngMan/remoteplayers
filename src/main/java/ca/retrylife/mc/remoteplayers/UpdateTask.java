@@ -55,6 +55,9 @@ public class UpdateTask extends TimerTask {
     public static ArrayList<String> onlinePlayers = new ArrayList<>();
     public static ArrayList<String> previousOnlinePlayers = new ArrayList<>();
 
+    // For keeping track of names of waypoints that are currently added to the active set in order to remove them and not any other user-created waypoints
+    private static final ArrayList<String> playerWaypointNames = new ArrayList<>();
+
     public UpdateTask() {
         this.mc = MinecraftClient.getInstance();
     }
@@ -286,6 +289,10 @@ public class UpdateTask extends TimerTask {
                         playerClientEntityIndexes.put(playerClientEntity.getEntityName(), i);
                     }
 
+                    // Keep track of which waypoints were previously shown to remove any that are not to be shown anymore
+                    ArrayList<String> previousPlayerWaypointNames = (ArrayList<String>) playerWaypointNames.clone();
+                    playerWaypointNames.clear();
+
                     // Add each player to the map
                     for (PlayerPosition playerPosition : playerPositions.values()) {
                         boolean showCurrentPlayersOverworldPositionInNether = false;
@@ -362,6 +369,7 @@ public class UpdateTask extends TimerTask {
                             // Append (N) or (OW) to name and asterisk to symbol if showing player in corresponding nether / overworld
                             waypoint.setName(playerName + (showCurrentPlayersOverworldPositionInNether ? " (OW)" : "") + (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
                             waypoint.setSymbol(waypoint.getSymbol().charAt(0) + (showCurrentPlayersOverworldPositionInNether || showCurrentPlayersNetherPositionInOverworld ? "*" : ""));
+                            playerWaypointNames.add(waypoint.getName());
                         }
 
                         // Otherwise, add a waypoint for the player
@@ -369,12 +377,14 @@ public class UpdateTask extends TimerTask {
                             try {
                                 PlayerWaypoint currentPlayerWaypoint = new PlayerWaypoint(playerPosition, showCurrentPlayersOverworldPositionInNether ? " (OW)" : (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
                                 waypointList.add(currentPlayerWaypoint);
+                                playerWaypointNames.add(currentPlayerWaypoint.getName());
                             } catch (NullPointerException ignored) {}
                         }
 
                     }
 
                     // Remove any waypoints for players not shown on map anymore
+                    waypointList.removeIf(waypoint -> waypoint.isTemporary() && previousPlayerWaypointNames.contains(waypoint.getName()) && !playerWaypointNames.contains(waypoint.getName()));
                     waypointList.removeIf(waypoint -> waypoint.isTemporary() && playerPositions.values().stream().noneMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
                     // Remove any waypoints for players in other dimensions if not configured to anymore
                     if(!Database.getInstance().showOverworldPositionInNether()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (OW)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));

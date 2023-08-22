@@ -90,6 +90,10 @@ public class DynmapConnection {
         }
         positions.put("OverworldPerson", new PlayerPosition("OverworldPerson", "Test World", 200, 100, 100));
         positions.put("NetherPerson", new PlayerPosition("NetherPerson", "Test World_nether", 100, 100, 200));
+        List<AbstractClientPlayerEntity> playerClientEntityList = MinecraftClient.getInstance().world.getPlayers();
+        for (AbstractClientPlayerEntity playerClientEntity : playerClientEntityList) {
+            positions.put(playerClientEntity.getName().copyContentOnly().getString(), new PlayerPosition(playerClientEntity.getName().copyContentOnly().getString(), "Test World", playerClientEntity.getBlockX(), playerClientEntity.getBlockY(), playerClientEntity.getBlockZ()));
+        }
         */
 
         return positions;
