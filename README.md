@@ -31,7 +31,7 @@ Example setup:
 This mod can be built by cloning this repository, then running:
 
 ```sh
-./gradlew build
+./gradlew remapJar
 ```
 
 The resulting mod files are stored in `build/libs/`
