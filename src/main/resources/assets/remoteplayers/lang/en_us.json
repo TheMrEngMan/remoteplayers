@@ -42,6 +42,9 @@
   "text.autoconfig.remoteplayers.option.minimapWaypointsRenderBelow.WHEN_PLAYER_LIST_HIDDEN": "Player list hidden",
   "text.autoconfig.remoteplayers.option.minimapWaypointsRenderBelow.ALWAYS": "Always",
 
+  "text.autoconfig.remoteplayers.option.showDimensionInTablist": "Show dimension in tablist",
+  "text.autoconfig.remoteplayers.option.showDimensionInTablist.@Tooltip": "Whether to add the following prefixes to the tab list:\n§7[§2O§7]§r Overworld, §7[§4N§7]§r Nether, §7[§5E§7]§r End, §7[§f?§7]§r Unknown",
+
   "text.autoconfig.remoteplayers.option.updateInterval.@PrefixText": "----------",
   "text.autoconfig.remoteplayers.option.updateInterval": "Update interval (seconds)",
   "text.autoconfig.remoteplayers.option.updateInterval.@Tooltip": "How often to request data from Dynmap",
@@ -66,5 +69,10 @@
 
   "text.remoteplayers.chat.nofification.playerdisappeared": "§<cc>%s§r disappeared from map, last world: §o%s",
   "text.remoteplayers.chat.nofification.playerappeared": "§<cc>%s§r appeared on map in world: §o%s",
-  "text.remoteplayers.chat.nofification.playermoved": "§<cc>%s§r moved from §o%s§r to §o%s"
+  "text.remoteplayers.chat.nofification.playermoved": "§<cc>%s§r moved from §o%s§r to §o%s",
+
+  "text.remoteplayers.tab.overworld": "§7[§2O§7]§r ",
+  "text.remoteplayers.tab.nether": "§7[§4N§7]§r ",
+  "text.remoteplayers.tab.end": "§7[§5E§7]§r ",
+  "text.remoteplayers.tab.unknown": "§7[§f?§7]§r "
 }

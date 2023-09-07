@@ -4,7 +4,7 @@
   "compatibilityLevel": "JAVA_8",
   "client": [
     "MinimapRadarMixin",
-    "MixinMinecraftClient",
+    "PlayerListHudMixin",
     "WaypointsGuiRendererMixin"
   ],
   "injectors": {

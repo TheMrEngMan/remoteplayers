@@ -42,6 +42,9 @@ public class RemotePlayerConfig implements ConfigData {
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public WaypointRenderBelowMode minimapWaypointsRenderBelow = WaypointRenderBelowMode.NEVER;
 
+    @ConfigEntry.Gui.Tooltip()
+    public boolean showDimensionInTablist = true;
+
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.Gui.Tooltip()
     @ConfigEntry.BoundedDiscrete(max = 60, min = 1)

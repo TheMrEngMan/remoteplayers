@@ -238,7 +238,12 @@ public class UpdateTask extends TimerTask {
         if (Database.getInstance().inGameWaypointsEnabled()) {
 
             // Fetch the correct list of waypoints
-            waypointList = getWaypointList();
+            try {
+                waypointList = getWaypointList();
+            } catch (NullPointerException e) {
+                logger.warn("Could not get waypoints list");
+                return;
+            }
 
             if(waypointList == null) {
                 logger.warn("Could not get waypoints list");

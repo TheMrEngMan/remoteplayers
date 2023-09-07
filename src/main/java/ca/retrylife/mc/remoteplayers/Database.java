@@ -54,6 +54,10 @@ public class Database {
         return config.minimapWaypointsRenderBelow;
     }
 
+    public boolean showDimensionInTablist() {
+        return config.showDimensionInTablist;
+    }
+
     public int updateInterval() {
         return config.updateInterval;
     }
