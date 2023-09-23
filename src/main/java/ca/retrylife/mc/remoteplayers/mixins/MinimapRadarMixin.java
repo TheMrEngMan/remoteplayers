@@ -22,7 +22,7 @@ public class MinimapRadarMixin {
         // Don't render if feature not enabled
         if(!Database.getInstance().entityRadarEnabled()) return worldEntities;
         // Don't render if there is no remote players available
-        if(UpdateTask.playerPositions == null || UpdateTask.playerPositions.size() == 0) return worldEntities;
+        if(UpdateTask.playerPositions == null || UpdateTask.playerPositions.isEmpty()) return worldEntities;
         // Don't render if can't get access to world to check for players in range
         if(MinecraftClient.getInstance().world == null)  return worldEntities;
 
