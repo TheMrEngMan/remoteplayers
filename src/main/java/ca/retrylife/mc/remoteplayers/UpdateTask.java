@@ -74,12 +74,12 @@ public class UpdateTask extends TimerTask {
     }
 
     public void onConfigChange() {
-        if(!Database.getInstance().modEnabled()) {
-            // Remove all the player positions if mod got disabled
-            if(playerPositions != null) playerPositions.clear();
-        } else {
-            // Otherwise, check if need to enable
-            RemotePlayers.enabled = Database.getInstance().serverHasDynmapLinked(RemotePlayers.currentServerIP);
+        // Check if need to enable
+        RemotePlayers.enabled = Database.getInstance().modEnabled() && Database.getInstance().serverHasDynmapLinked(RemotePlayers.currentServerIP);
+
+        if(!RemotePlayers.enabled) {
+            // Discard all player positions if mod got disabled
+            playerPositions = null;
         }
         recreateWaypoints();
         updateNow();
@@ -109,8 +109,8 @@ public class UpdateTask extends TimerTask {
     }
 
     public void onDisconnect() {
-        // Remove all the player positions when disconnecting from server
-        if(playerPositions != null) playerPositions.clear();
+        // Discard all player positions when disconnecting from server
+        playerPositions = null;
     }
 
     public void run() {

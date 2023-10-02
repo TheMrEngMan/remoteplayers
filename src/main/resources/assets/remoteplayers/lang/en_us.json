@@ -60,7 +60,8 @@
   "text.autoconfig.remoteplayers.option.serverDynmapURLs.@Tooltip": "For each server you'd like to use the mod on,\nfill out the IP and corresponding Dynmap URL like so:\nplay.example.com -> https://dynmap.example.com",
 
   "text.remoteplayers.chat.prefix": "§8[§7RP§8]§r ",
-  "text.remoteplayers.chat.command.notenabled": "§cNo Dynmap URL configured for this server, or an error occurred getting data",
+  "text.remoteplayers.chat.command.notenabled": "§cRemote Players is currently disabled, check the configuration to enable",
+  "text.remoteplayers.chat.command.notconfigured": "§cNo Dynmap URL configured for this server, or an error occurred getting data",
   "text.remoteplayers.chat.command.playerlist.noplayers": "No players on map",
   "text.remoteplayers.chat.command.playerlist.header": "Players on map (%s):",
   "text.remoteplayers.chat.command.playerinfo.info": "§<cc>%s§r: %s§cx§r %s§ay§r %s§9z§r in §o%s",

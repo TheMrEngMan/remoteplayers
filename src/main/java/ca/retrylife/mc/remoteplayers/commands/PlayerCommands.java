@@ -82,8 +82,12 @@ public class PlayerCommands {
     static class PlayerListCommand implements Command<FabricClientCommandSource> {
         @Override
         public int run(CommandContext<FabricClientCommandSource> context) {
-            if(!RemotePlayers.enabled) {
+            if(!Database.getInstance().modEnabled()) {
                 context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notenabled"));
+                return -1;
+            }
+            if(!RemotePlayers.enabled) {
+                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notconfigured"));
                 return -1;
             }
 
@@ -106,8 +110,12 @@ public class PlayerCommands {
     static class PlayerInfoCommand implements Command<FabricClientCommandSource> {
         @Override
         public int run(CommandContext<FabricClientCommandSource> context) {
-            if(!RemotePlayers.enabled) {
+            if(!Database.getInstance().modEnabled()) {
                 context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notenabled"));
+                return -1;
+            }
+            if(!RemotePlayers.enabled) {
+                context.getSource().sendFeedback(Text.translatable("text.remoteplayers.chat.command.notconfigured"));
                 return -1;
             }
 
