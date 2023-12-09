@@ -203,7 +203,7 @@ public class UpdateTask extends TimerTask {
             if(previousPlayerPositions != null && Database.getInstance().getChatNotificationType() != RemotePlayerConfig.ChatNotificationType.NONE) {
                 for (PlayerPosition previousPlayerPosition : previousPlayerPositions.values()) {
                     // Don't show notifications for self
-                    if(previousPlayerPosition.username.equals(mc.player.getEntityName())) continue;
+                    if(previousPlayerPosition.username.equals(mc.player.getGameProfile().getName())) continue;
                     // Don't show notifications for invisible players
                     if(previousPlayerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) continue;
                     if (!playerPositions.containsKey(previousPlayerPosition.username) && onlinePlayers.contains(previousPlayerPosition.username)) {
@@ -216,7 +216,7 @@ public class UpdateTask extends TimerTask {
                 }
                 for (PlayerPosition playerPosition : playerPositions.values()) {
                     // Don't show notifications for self
-                    if(playerPosition.username.equals(mc.player.getEntityName())) continue;
+                    if(playerPosition.username.equals(mc.player.getGameProfile().getName())) continue;
                     // Don't show notifications for invisible players
                     if(playerPosition.worldName.equals(DynmapConnection.BOGUS_WORLD_NAME)) continue;
                     if (!previousPlayerPositions.containsKey(playerPosition.username) && previousOnlinePlayers.contains(playerPosition.username) && onlinePlayers.contains(playerPosition.username)) {
@@ -291,108 +291,113 @@ public class UpdateTask extends TimerTask {
                     HashMap<String, Integer> playerClientEntityIndexes = new HashMap<>(waypointList.size());
                     for (int i = 0; i < playerClientEntityList.size(); i++) {
                         AbstractClientPlayerEntity playerClientEntity = playerClientEntityList.get(i);
-                        playerClientEntityIndexes.put(playerClientEntity.getEntityName(), i);
+                        playerClientEntityIndexes.put(playerClientEntity.getGameProfile().getName(), i);
                     }
 
                     // Keep track of which waypoints were previously shown to remove any that are not to be shown anymore
                     ArrayList<String> currentPlayerWaypointNames = new ArrayList<>();
 
                     // Add each player to the map
-                    for (PlayerPosition playerPosition : playerPositions.values()) {
-                        boolean showCurrentPlayersOverworldPositionInNether = false;
-                        boolean showCurrentPlayersNetherPositionInOverworld = false;
-                        String playerName = playerPosition.username;
+                    if(playerPositions != null) {
+                        for (PlayerPosition playerPosition : playerPositions.values()) {
+                            boolean showCurrentPlayersOverworldPositionInNether = false;
+                            boolean showCurrentPlayersNetherPositionInOverworld = false;
+                            String playerName = playerPosition.username;
 
-                        // If this player is self, don't show waypoint
-                        if (mc.player.getName() != null && playerName.equals(mc.player.getEntityName())) continue;
-
-                        // If the player is in a different world, and not configured to show overworld positions in nether or vise-versa, don't show waypoint
-                        if(!Database.getInstance().showOverworldPositionInNether() && !Database.getInstance().showNetherPositionInOverworld()) {
-                            if (!playerPosition.worldName.equals(currentWorldMapName)) continue;
-                        }
-                        // Otherwise, if configured to show overworld positions in nether or vise-versa, only show if the player is in the corresponding world or same world
-                        else {
-                            if (Database.getInstance().showOverworldPositionInNether() && playerPosition.worldName.equals(currentWorldCorrespondingOverworldName)) {
-                                showCurrentPlayersOverworldPositionInNether = true;
-                            }
-                            else if (Database.getInstance().showNetherPositionInOverworld() && playerPosition.worldName.equals(currentWorldCorrespondingNetherName)) {
-                                showCurrentPlayersNetherPositionInOverworld = true;
-                            }
-                            else if(!playerPosition.worldName.equals(currentWorldMapName)) {
+                            // If this player is self, don't show waypoint
+                            if (mc.player.getName() != null && playerName.equals(mc.player.getGameProfile().getName()))
                                 continue;
+
+                            // If the player is in a different world, and not configured to show overworld positions in nether or vise-versa, don't show waypoint
+                            if (!Database.getInstance().showOverworldPositionInNether() && !Database.getInstance().showNetherPositionInOverworld()) {
+                                if (!playerPosition.worldName.equals(currentWorldMapName)) continue;
                             }
-                        }
+                            // Otherwise, if configured to show overworld positions in nether or vise-versa, only show if the player is in the corresponding world or same world
+                            else {
+                                if (Database.getInstance().showOverworldPositionInNether() && playerPosition.worldName.equals(currentWorldCorrespondingOverworldName)) {
+                                    showCurrentPlayersOverworldPositionInNether = true;
+                                } else if (Database.getInstance().showNetherPositionInOverworld() && playerPosition.worldName.equals(currentWorldCorrespondingNetherName)) {
+                                    showCurrentPlayersNetherPositionInOverworld = true;
+                                } else if (!playerPosition.worldName.equals(currentWorldMapName)) {
+                                    continue;
+                                }
+                            }
 
-                        // Check if this player is within the server's player entity tracking range
-                        if (playerClientEntityIndexes.containsKey(playerName)) {
+                            // Check if this player is within the server's player entity tracking range
+                            if (playerClientEntityIndexes.containsKey(playerName)) {
 
-                            AbstractClientPlayerEntity playerClientEntity = playerClientEntityList.get(playerClientEntityIndexes.get(playerName));
-                            int minimumWaypointDistanceToUse = Database.getInstance().minimumWaypointDistance();
-                            int minimumVisibleWaypointDistanceToUse = Database.getInstance().minimumVisibleWaypointDistance();
-                            if(minimumWaypointDistanceToUse > minimumVisibleWaypointDistanceToUse) minimumVisibleWaypointDistanceToUse = minimumWaypointDistanceToUse;
+                                AbstractClientPlayerEntity playerClientEntity = playerClientEntityList.get(playerClientEntityIndexes.get(playerName));
+                                int minimumWaypointDistanceToUse = Database.getInstance().minimumWaypointDistance();
+                                int minimumVisibleWaypointDistanceToUse = Database.getInstance().minimumVisibleWaypointDistance();
+                                if (minimumWaypointDistanceToUse > minimumVisibleWaypointDistanceToUse)
+                                    minimumVisibleWaypointDistanceToUse = minimumWaypointDistanceToUse;
 
-                            // If in range of the minimum visible waypoint distance, potentially need to check if visible
-                            if(minimumVisibleWaypointDistanceToUse > 0 && playerClientEntity.isInRange(mc.cameraEntity, minimumVisibleWaypointDistanceToUse)) {
+                                // If in range of the minimum visible waypoint distance, potentially need to check if visible
+                                if (minimumVisibleWaypointDistanceToUse > 0 && playerClientEntity.isInRange(mc.cameraEntity, minimumVisibleWaypointDistanceToUse)) {
 
-                                if(minimumWaypointDistanceToUse > 0) {
-                                    // If closer than the minimum waypoint distance, don't show waypoint
-                                    if (playerClientEntity.isInRange(mc.cameraEntity, minimumWaypointDistanceToUse)) {
-                                        continue;
-                                    }
-                                    // Otherwise, need to check if player is visible
-                                    else {
-                                        RaycastContext raycastContext = new RaycastContext(mc.cameraEntity.getPos(), playerClientEntity.getPos(), RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.ANY, mc.cameraEntity);
-                                        // If this player is visible, don't show waypoint
-                                        if (mc.world.raycast(raycastContext).getType() != HitResult.Type.BLOCK) {
+                                    if (minimumWaypointDistanceToUse > 0) {
+                                        // If closer than the minimum waypoint distance, don't show waypoint
+                                        if (playerClientEntity.isInRange(mc.cameraEntity, minimumWaypointDistanceToUse)) {
                                             continue;
                                         }
+                                        // Otherwise, need to check if player is visible
+                                        else {
+                                            RaycastContext raycastContext = new RaycastContext(mc.cameraEntity.getPos(), playerClientEntity.getPos(), RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.ANY, mc.cameraEntity);
+                                            // If this player is visible, don't show waypoint
+                                            if (mc.world.raycast(raycastContext).getType() != HitResult.Type.BLOCK) {
+                                                continue;
+                                            }
+                                        }
                                     }
+
                                 }
 
                             }
 
-                        }
+                            // If a waypoint for this player already exists, update it
+                            if (waypointNamesIndexes.containsKey(playerName)) {
+                                Waypoint waypoint = waypointList.get(waypointNamesIndexes.get(playerName));
 
-                        // If a waypoint for this player already exists, update it
-                        if (waypointNamesIndexes.containsKey(playerName)) {
-                            Waypoint waypoint = waypointList.get(waypointNamesIndexes.get(playerName));
+                                // Scale the coordinates if showing player in corresponding nether / overworld
+                                double coordinateMultiplier = 1;
+                                if (showCurrentPlayersOverworldPositionInNether) {
+                                    coordinateMultiplier = 1d / RemotePlayers.NETHER_COORDINATE_SCALE;
+                                } else if (showCurrentPlayersNetherPositionInOverworld) {
+                                    coordinateMultiplier = RemotePlayers.NETHER_COORDINATE_SCALE;
+                                }
 
-                            // Scale the coordinates if showing player in corresponding nether / overworld
-                            double coordinateMultiplier = 1;
-                            if(showCurrentPlayersOverworldPositionInNether) {
-                                coordinateMultiplier = 1d / RemotePlayers.NETHER_COORDINATE_SCALE;
+                                waypoint.setX((int) (playerPosition.x * coordinateMultiplier));
+                                waypoint.setY(playerPosition.y - 1);
+                                waypoint.setZ((int) (playerPosition.z * coordinateMultiplier));
+
+                                // Append (N) or (OW) to name and asterisk to symbol if showing player in corresponding nether / overworld
+                                waypoint.setName(playerName + (showCurrentPlayersOverworldPositionInNether ? " (OW)" : "") + (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
+                                waypoint.setSymbol(waypoint.getSymbol().charAt(0) + (showCurrentPlayersOverworldPositionInNether || showCurrentPlayersNetherPositionInOverworld ? "*" : ""));
+                                currentPlayerWaypointNames.add(waypointNameToPlayerName(waypoint.getName()));
                             }
-                            else if (showCurrentPlayersNetherPositionInOverworld) {
-                                coordinateMultiplier = RemotePlayers.NETHER_COORDINATE_SCALE;
+
+                            // Otherwise, add a waypoint for the player
+                            else {
+                                try {
+                                    PlayerWaypoint currentPlayerWaypoint = new PlayerWaypoint(playerPosition, showCurrentPlayersOverworldPositionInNether ? " (OW)" : (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
+                                    waypointList.add(currentPlayerWaypoint);
+                                    currentPlayerWaypointNames.add(waypointNameToPlayerName(currentPlayerWaypoint.getName()));
+                                    allCreatedPlayerWaypointNames.add(waypointNameToPlayerName(currentPlayerWaypoint.getName()));
+                                } catch (NullPointerException ignored) {
+                                }
                             }
 
-                            waypoint.setX((int)(playerPosition.x * coordinateMultiplier));
-                            waypoint.setY(playerPosition.y - 1);
-                            waypoint.setZ((int)(playerPosition.z * coordinateMultiplier));
-
-                            // Append (N) or (OW) to name and asterisk to symbol if showing player in corresponding nether / overworld
-                            waypoint.setName(playerName + (showCurrentPlayersOverworldPositionInNether ? " (OW)" : "") + (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
-                            waypoint.setSymbol(waypoint.getSymbol().charAt(0) + (showCurrentPlayersOverworldPositionInNether || showCurrentPlayersNetherPositionInOverworld ? "*" : ""));
-                            currentPlayerWaypointNames.add(waypointNameToPlayerName(waypoint.getName()));
                         }
-
-                        // Otherwise, add a waypoint for the player
-                        else {
-                            try {
-                                PlayerWaypoint currentPlayerWaypoint = new PlayerWaypoint(playerPosition, showCurrentPlayersOverworldPositionInNether ? " (OW)" : (showCurrentPlayersNetherPositionInOverworld ? " (N)" : ""));
-                                waypointList.add(currentPlayerWaypoint);
-                                currentPlayerWaypointNames.add(waypointNameToPlayerName(currentPlayerWaypoint.getName()));
-                                allCreatedPlayerWaypointNames.add(waypointNameToPlayerName(currentPlayerWaypoint.getName()));
-                            } catch (NullPointerException ignored) {}
-                        }
-
                     }
 
                     // Remove any waypoints for players not shown on map anymore
                     waypointList.removeIf(waypoint -> waypoint.isTemporary() && allCreatedPlayerWaypointNames.contains(waypoint.getName()) && !currentPlayerWaypointNames.contains(waypoint.getName()));
-                    // Remove any waypoints for players in other dimensions if not configured to anymore
-                    if(!Database.getInstance().showOverworldPositionInNether()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (OW)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
-                    if(!Database.getInstance().showNetherPositionInOverworld()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (N)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
+
+                    if(playerPositions != null) {
+                        // Remove any waypoints for players in other dimensions if not configured to anymore
+                        if(!Database.getInstance().showOverworldPositionInNether()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (OW)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
+                        if(!Database.getInstance().showNetherPositionInOverworld()) waypointList.removeIf(waypoint -> waypoint.isTemporary() && waypoint.getName().contains(" (N)") && playerPositions.values().stream().anyMatch(p -> p.username.equals(waypointNameToPlayerName(waypoint.getName()))));
+                    }
 
                 }
             } catch (ConcurrentModificationException ignored) {}
